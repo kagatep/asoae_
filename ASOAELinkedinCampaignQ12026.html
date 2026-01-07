@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ASOAE 2026 | Strategic Acquisition & Lead Intelligence Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Updated Chart.js to specific UMD version for stability -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Teko:wght@400;600;700&display=swap');
+        
+        :root {
+            --asoae-gold: #D4AF37;
+            --asoae-black: #050505;
+            --asoae-white: #FFFFFF;
+            --asoae-blue: #2563eb;
+            --asoae-charcoal: #111111;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: var(--asoae-white);
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .heading-font { font-family: 'Teko', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (max-width: 767px) { .chart-container { height: 260px; } }
+        @media (min-width: 768px) { .chart-container { height: 380px; } }
+
+        .gold-border { border: 1px solid var(--asoae-gold); }
+        .gold-text { color: var(--asoae-gold); }
+        .bg-gold { background-color: var(--asoae-gold); }
+        
+        .card-elevation {
+            background: var(--asoae-charcoal);
+            border: 1px solid #222;
+            border-radius: 16px;
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.7);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @media (hover: hover) {
+            .card-elevation:hover {
+                border-color: var(--asoae-gold);
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px -10px rgba(212, 175, 55, 0.15);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #050505; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #222;
+            border-radius: 4px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: var(--asoae-gold);
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .stat-glow { text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); }
+
+        .milestone-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--asoae-gold);
+            position: relative;
+            flex-shrink: 0;
+        }
+        
+        @media (min-width: 1024px) {
+            .milestone-dot::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 100%;
+                width: calc(100% + 2rem);
+                height: 2px;
+                background: #222;
+                z-index: -1;
+            }
+        }
+    </style>
+</head>
+<body class="p-0 m-0 antialiased overflow-x-hidden">
+
+    <!-- HERO SECTION -->
+    <header class="relative w-full pt-20 pb-16 px-6 bg-gradient-to-b from-neutral-900 via-black to-black border-b border-white/5 overflow-hidden">
+        <div class="max-w-7xl mx-auto flex flex-col items-center text-center space-y-6 md:space-y-8">
+            <div class="inline-block px-4 py-1.5 border border-asoae-gold/30 rounded-full bg-asoae-gold/5 backdrop-blur-md">
+                <span class="text-[9px] md:text-[11px] font-black tracking-[0.3em] md:tracking-[0.4em] uppercase text-asoae-gold">Strategic Acquisition & Lead Intel // 2026</span>
+            </div>
+            <h1 class="text-6xl md:text-[10rem] font-bold leading-none tracking-tighter heading-font mb-2">
+                SCALE & <span class="gold-text">PRECISION.</span>
+            </h1>
+            <p class="text-lg md:text-3xl text-gray-400 max-w-4xl font-light leading-relaxed px-2">
+                ASOAE's expansion to <span class="text-white font-bold italic">30,000 SQ FT</span> and the acquisition of <span class="gold-text font-bold">Free Hand Sign Co.</span> creates a bi-coastal powerhouse for <span class="text-blue-500 font-bold">NYC</span> and <span class="gold-text font-bold">Las Vegas</span> markets.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
+                <a href="#leads" class="bg-white text-black px-8 py-4 rounded-full font-black uppercase text-xs tracking-widest hover:bg-asoae-gold transition-all text-center">Lead Intelligence</a>
+                <a href="#roi" class="border border-white/20 px-8 py-4 rounded-full font-black uppercase text-xs tracking-widest hover:bg-white hover:text-black transition-all text-center">ROI Estimator</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: INFRASTRUCTURE -->
+    <section class="py-16 md:py-24 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 mb-12 md:mb-16 items-center">
+            <div class="space-y-6">
+                <h2 class="text-5xl md:text-6xl font-bold heading-font">The Hardware of the <span class="gold-text">Impossible.</span></h2>
+                <p class="text-gray-400 leading-relaxed text-base md:text-lg">
+                    The January 2026 expansion is a technical ecosystem designed to support the most complex experiential briefs in North America.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8 pt-2">
+                    <div class="border-l-2 border-asoae-gold pl-6 py-2">
+                        <span class="block text-2xl md:text-3xl font-bold heading-font tracking-widest italic">FACTORY</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-black">LA Main (Heavy Fab)</span>
+                    </div>
+                    <div class="border-l-2 border-asoae-blue pl-6 py-2">
+                        <span class="block text-2xl md:text-3xl font-bold heading-font tracking-widest italic">STUDIOS</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-black">Worth St (Content)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 md:gap-4">
+                <div class="card-elevation p-4 md:p-6 text-center">
+                    <div class="text-asoae-gold text-2xl md:text-3xl font-bold heading-font mb-1">2x</div>
+                    <div class="text-[9px] md:text-[10px] uppercase font-black text-gray-500">CNC Stations</div>
+                </div>
+                <div class="card-elevation p-4 md:p-6 text-center">
+                    <div class="text-asoae-gold text-2xl md:text-3xl font-bold heading-font mb-1">2x</div>
+                    <div class="text-[9px] md:text-[10px] uppercase font-black text-gray-500">Laser Tables</div>
+                </div>
+                <div class="card-elevation p-4 md:p-6 text-center">
+                    <div class="text-asoae-gold text-2xl md:text-3xl font-bold heading-font mb-1">4x</div>
+                    <div class="text-[9px] md:text-[10px] uppercase font-black text-gray-500">L-Format Zones</div>
+                </div>
+                <div class="card-elevation p-4 md:p-6 text-center">
+                    <div class="text-asoae-blue text-2xl md:text-3xl font-bold heading-font mb-1">20ft</div>
+                    <div class="text-[9px] md:text-[10px] uppercase font-black text-gray-500">Cyclorama</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            <div class="card-elevation p-6 md:p-8 space-y-3">
+                <h3 class="text-xl md:text-2xl font-bold heading-font gold-text">Free Hand Sign Co.</h3>
+                <p class="text-[10px] uppercase font-black tracking-tighter text-gray-500">Acquisition Integrated</p>
+                <p class="text-sm text-gray-400">Absorbing master-level neon, architectural vinyl, and 3D branding muscle.</p>
+            </div>
+            <div class="card-elevation p-6 md:p-8 space-y-3">
+                <h3 class="text-xl md:text-2xl font-bold heading-font">Merch Lab</h3>
+                <p class="text-[10px] uppercase font-black tracking-tighter text-gray-500">In-House Custom Apparel</p>
+                <p class="text-sm text-gray-400">Equipped with dual DTG stations for high-fidelity brand merchandise.</p>
+            </div>
+            <div class="card-elevation p-6 md:p-8 space-y-3">
+                <h3 class="text-xl md:text-2xl font-bold heading-font">ASOAE Workshop (NJ)</h3>
+                <p class="text-[10px] uppercase font-black tracking-tighter text-gray-500">NYC Strategy Point</p>
+                <p class="text-sm text-gray-400">Local strike team serving Manhattan and DC with zero logistical lag.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: LEAD INTELLIGENCE -->
+    <section id="leads" class="py-16 md:py-24 px-6 bg-white/5 border-y border-white/10">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6">
+                <div class="max-w-2xl space-y-3">
+                    <h2 class="text-4xl md:text-5xl font-bold heading-font">Lead Intelligence <span class="gold-text">Matrix</span></h2>
+                    <p class="text-gray-400 text-base md:text-lg">Quantifying LinkedIn intent for ASOAE 2026 expenditure.</p>
+                </div>
+                <div class="flex gap-4 md:gap-6 pb-2">
+                    <div class="text-left md:text-right">
+                        <span class="block text-xl md:text-2xl font-bold heading-font gold-text stat-glow">4.2x</span>
+                        <span class="text-[8px] md:text-[9px] uppercase font-black text-gray-500 tracking-widest">LinkedIn Intent</span>
+                    </div>
+                    <div class="text-left md:text-right">
+                        <span class="block text-xl md:text-2xl font-bold heading-font text-blue-500 stat-glow">82%</span>
+                        <span class="text-[8px] md:text-[9px] uppercase font-black text-gray-500 tracking-widest">NYC Producer Density</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                <div class="card-elevation p-6 md:p-10 space-y-6">
+                    <div class="space-y-1">
+                        <h4 class="text-lg md:text-xl font-bold heading-font">Market Share by Vertical</h4>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">NYC vs Vegas Demand Mix</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="verticalChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card-elevation p-6 md:p-10 space-y-6">
+                    <div class="space-y-1">
+                        <h4 class="text-lg md:text-xl font-bold heading-font gold-text">Reach Projection (H1 2026)</h4>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">LinkedIn Impression Growth</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="reachChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 mt-8 md:mt-12">
+                <div class="card-elevation p-6 md:p-10 text-center space-y-6">
+                    <h4 class="text-lg md:text-xl font-bold heading-font">Platform Fidelity</h4>
+                    <div class="chart-container h-[260px] md:h-[400px]">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+                <div class="card-elevation p-6 md:p-10 text-center space-y-6">
+                    <h4 class="text-lg md:text-xl font-bold heading-font">Hub Decision Maker Density</h4>
+                    <div class="chart-container h-[260px] md:h-[400px]">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: ROI ESTIMATOR -->
+    <section id="roi" class="py-16 md:py-24 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-12 md:mb-16 space-y-3">
+            <h2 class="text-5xl md:text-6xl font-bold heading-font">Campaign ROI <span class="gold-text">Estimator</span></h2>
+            <p class="text-gray-500 max-w-2xl mx-auto text-sm md:text-base">Interactive simulation of marketing impact.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 items-center">
+            <div class="lg:col-span-5 space-y-8 card-elevation p-6 md:p-10">
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Outreach Intensity</label>
+                        <span id="reachVal" class="text-[10px] font-bold gold-text">50,000</span>
+                    </div>
+                    <input type="range" id="reachInput" min="10000" max="250000" step="10000" value="50000" oninput="updateROI()">
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Engagement Target</label>
+                        <span id="engageVal" class="text-[10px] font-bold gold-text">2%</span>
+                    </div>
+                    <input type="range" id="engageInput" min="0.5" max="5" step="0.5" value="2" oninput="updateROI()">
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400">Lead Conversion Rate</label>
+                        <span id="convVal" class="text-[10px] font-bold gold-text">1%</span>
+                    </div>
+                    <input type="range" id="convInput" min="0.1" max="3" step="0.1" value="1" oninput="updateROI()">
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8">
+                <div class="bg-asoae-gold/5 border border-asoae-gold/20 p-8 md:p-10 rounded-2xl text-center space-y-2">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-500">Qualified Briefs</span>
+                    <div id="briefCount" class="text-5xl md:text-7xl font-bold heading-font gold-text stat-glow">10</div>
+                    <p class="text-[10px] text-gray-600">Project inquiries per quarter.</p>
+                </div>
+                <div class="bg-asoae-blue/5 border border-asoae-blue/20 p-8 md:p-10 rounded-2xl text-center space-y-2">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-gray-500">Pipe Value</span>
+                    <div id="pipeVal" class="text-5xl md:text-7xl font-bold heading-font text-asoae-blue stat-glow">$1.5M</div>
+                    <p class="text-[10px] text-gray-600 italic">Avg $150k contract.</p>
+                </div>
+                <div class="sm:col-span-2 card-elevation p-6 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-base md:text-lg font-bold heading-font">Winning Capability Score</h4>
+                        <p class="text-[10px] text-gray-500">Infrastructure Alignment</p>
+                    </div>
+                    <div id="scoreVal" class="text-3xl md:text-4xl font-bold heading-font italic">72/100</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: THE 10-POST ROLLOUT -->
+    <section class="py-16 md:py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6">
+            <div class="space-y-3">
+                <h2 class="text-4xl md:text-5xl font-bold heading-font">10-Post <span class="gold-text">Rollout</span> Matrix</h2>
+                <p class="text-gray-400 text-sm md:text-base">Content sequence for conversion.</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button onclick="filterPosts('all')" class="filter-btn filter-active px-5 py-2 rounded-full border border-asoae-gold/30 text-[9px] font-black uppercase tracking-widest transition-all">All</button>
+                <button onclick="filterPosts('authority')" class="filter-btn px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest transition-all">Authority</button>
+                <button onclick="filterPosts('leadgen')" class="filter-btn px-5 py-2 rounded-full border border-white/10 text-[9px] font-black uppercase tracking-widest transition-all">Lead Gen</button>
+            </div>
+        </div>
+
+        <div id="postsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- JS Inject -->
+        </div>
+    </section>
+
+    <!-- SECTION 5: INTERNAL SIGN-OFF -->
+    <section id="signoff" class="py-16 md:py-24 px-6 bg-gradient-to-t from-asoae-gold/5 to-transparent border-t border-asoae-gold/20">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
+            
+            <div class="space-y-10">
+                <div class="space-y-3">
+                    <h2 class="text-4xl font-bold heading-font uppercase">2026 Operational Milestones</h2>
+                    <p class="text-gray-500 text-xs italic tracking-widest uppercase">Internal Tracking Only</p>
+                </div>
+                
+                <div class="space-y-10 relative">
+                    <div class="absolute left-[5px] top-2 bottom-2 w-[2px] bg-[#222] lg:hidden"></div>
+                    
+                    <div class="flex items-start gap-4 md:gap-6 relative">
+                        <div class="milestone-dot mt-2 z-10"></div>
+                        <div>
+                            <h4 class="font-bold uppercase text-asoae-gold text-xs md:text-sm tracking-widest leading-none mb-2">Late Jan 2026: HQ Opening</h4>
+                            <p class="text-[11px] text-gray-500">30,000 Sq Ft Expansion. CNC & Plasma Activation.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 md:gap-6 relative">
+                        <div class="milestone-dot mt-2 z-10 opacity-50"></div>
+                        <div>
+                            <h4 class="font-bold uppercase text-white text-xs md:text-sm tracking-widest leading-none mb-2">February 2026: Free Hand Sign Co.</h4>
+                            <p class="text-[11px] text-gray-500">Onboarding design lead and equipment merging.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 md:gap-6 relative">
+                        <div class="milestone-dot mt-2 z-10 opacity-30"></div>
+                        <div>
+                            <h4 class="font-bold uppercase text-white text-xs md:text-sm tracking-widest leading-none mb-2">Spring 2026: Worth St Studio</h4>
+                            <p class="text-[11px] text-gray-500">Cyclorama and LED wall fully operational.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-elevation p-8 md:p-10 flex flex-col justify-center space-y-8">
+                <div class="text-center space-y-1">
+                    <h3 class="text-xl md:text-2xl font-bold heading-font tracking-widest">Executive Authorization</h3>
+                    <p class="text-[9px] text-gray-500 uppercase font-black">2026 Budget Approval Hub</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center p-3 md:p-4 bg-white/5 rounded-lg border border-white/10">
+                        <span class="text-[10px] font-bold uppercase tracking-widest">H1 Marketing Budget</span>
+                        <span class="text-[10px] font-black gold-text">PENDING</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 md:p-4 bg-white/5 rounded-lg border border-white/10">
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Content Approval</span>
+                        <span class="text-[10px] font-black text-blue-500 italic">REVIEWED</span>
+                    </div>
+                </div>
+
+                <button class="w-full bg-asoae-gold text-black py-4 rounded-full font-black uppercase tracking-widest text-xs md:text-sm active:scale-95 transition-all shadow-lg shadow-asoae-gold/20">
+                    Authorize Rollout
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTERNAL FOOTER -->
+    <footer class="py-12 px-6 bg-black border-t border-white/5 text-center">
+        <div class="max-w-4xl mx-auto space-y-4">
+            <div class="text-[9px] font-bold text-gray-600 uppercase tracking-[0.4em] leading-relaxed">
+                ASOAE // CONFIDENTIAL INTERNAL STRATEGY // DO NOT DISTRIBUTE
+            </div>
+            <p class="text-[8px] text-gray-800">© 2026 ASOAE Logistics & Fabrication North America.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // Global storage for chart instances to destroy them on re-render
+        const charts = {};
+
+        const posts = [
+            { id: 1, type: 'authority', market: 'National', title: 'Acquisition + HQ Expansion', copy: 'We’re kicking off 2026 with real expansion. ASOAE has officially acquired Free Hand Sign Company—bringing signage expertise into our ecosystem. Plus, our new 30,000 sq ft HQ opens late January.', creative: 'Big News Graphic: Acquisition + Facility scale' },
+            { id: 2, type: 'leadgen', market: 'National', title: 'Vendor Roll Call', copy: 'Expanding our preferred vendor network as our new HQ comes online. Looking for partners in Plasma work, CNC/Laser cutting, foam carving, and finish specialists.', creative: 'High-contrast graphic: "ASOAE VENDOR NETWORK - NOW BOOKING"' },
+            { id: 3, type: 'authority', market: 'National', title: 'Impossible → Possible', copy: '“You toss us the impossible to make it possible.” We’re scaling the infrastructure behind it: new HQ and expanded fabrication + print capacity under one roof.', creative: 'BTS video clip: load-in to final reveal' },
+            { id: 4, type: 'leadgen', market: 'National', title: 'Live Streaming + Studios', copy: 'Hybrid works best when treated like a show—not a webcam. Building a fully operational photo/film studio by Spring 2026 with cyclorama + LED wall/floor area.', creative: 'Studio Reel: Control room signal + audience reaction' },
+            { id: 5, type: 'authority', market: 'Vegas', title: 'Fabrication Specs', copy: 'Fabrication is schedule discipline + precision. Our new HQ expansion includes 2 CNC stations, 2 laser tables, a plasma cutter, and a dedicated foam department.', creative: 'Before/After: Render to installed booth' },
+            { id: 6, type: 'leadgen', market: 'Vegas', title: 'Trade Shows + Signage', copy: 'Signage is where “almost ready” turns into “camera ready.” With the Free Hand Sign Company acquisition, we’ve strengthened our signage lane for Q1-Q2 shows.', creative: '3-slide carousel: sketch to show floor reality' },
+            { id: 7, type: 'leadgen', market: 'NYC', title: 'Graphics + Print Proof', copy: 'Branding at an event lives or dies in the details. New HQ upgrades include 4 large-format zones, flatbed substrate printing, and a dedicated QC photo station.', creative: 'Closeups: high-fidelity vinyl and substrate textures' },
+            { id: 8, type: 'leadgen', market: 'NYC', title: 'Finishing + Neon', copy: 'Finishing is where builds go from “constructed” to “premium.” We’ve added a 25ft x 50ft climate-controlled paint room + dedicated areas for LED neon signage.', creative: 'Visual: Paint room action + neon glow results' },
+            { id: 9, type: 'leadgen', market: 'National', title: 'Merch Lab Expansion', copy: 'Speed matters for event merch. Expanding in-house production with DTG stations + heat press tooling. Merch as part of the production plan, not a scramble.', creative: 'Photos: Custom merch production details' },
+            { id: 10, type: 'leadgen', market: 'National', title: 'How To Work With Us', copy: 'Brief → Clear Plan → realistic path to execution. Leverage our expanded in-house capabilities (fabrication/print/finishing/merch). We keep it turnkey.', creative: 'Simple 4-step graphic: Inquiry to Execution' }
+        ];
+
+        function wrapLabel(label) {
+            if (label.length > 16) {
+                const words = label.split(' ');
+                const lines = [];
+                let currentLine = "";
+                words.forEach(word => {
+                    if ((currentLine + word).length > 16) {
+                        lines.push(currentLine.trim());
+                        currentLine = word + " ";
+                    } else {
+                        currentLine += word + " ";
+                    }
+                });
+                lines.push(currentLine.trim());
+                return lines;
+            }
+            return label;
+        }
+
+        const getBaseOptions = (isRadial = false) => {
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                const label = item.chart.data.labels[item.dataIndex];
+                                return Array.isArray(label) ? label.join(' ') : label;
+                            }
+                        }
+                    },
+                    legend: { labels: { color: '#888', font: { size: 9 } } }
+                }
+            };
+
+            if (isRadial) {
+                options.scales = {
+                    r: { 
+                        grid: { color: '#222' }, 
+                        angleLines: { color: '#222' }, 
+                        pointLabels: { color: '#888', font: { size: 9 } },
+                        ticks: { display: false }
+                    }
+                };
+            } else {
+                options.scales = {
+                    y: { grid: { color: '#222' }, ticks: { color: '#555', font: { size: 9 } } },
+                    x: { ticks: { color: '#555', font: { size: 9 } }, grid: { display: false } }
+                };
+            }
+            return options;
+        };
+
+        function createChart(id, config) {
+            if (charts[id]) {
+                charts[id].destroy();
+            }
+            const ctx = document.getElementById(id).getContext('2d');
+            charts[id] = new Chart(ctx, config);
+        }
+
+        function initCharts() {
+            createChart('verticalChart', {
+                type: 'bar',
+                data: {
+                    labels: [wrapLabel('Luxury Retail'), wrapLabel('Tech Activations'), wrapLabel('Sports Spectacles'), wrapLabel('Auto Launches')],
+                    datasets: [
+                        { label: 'NYC', data: [45, 25, 15, 15], backgroundColor: '#2563eb' },
+                        { label: 'Vegas', data: [15, 35, 40, 10], backgroundColor: '#D4AF37' }
+                    ]
+                },
+                options: {
+                    ...getBaseOptions(),
+                    scales: {
+                        x: { stacked: true, ticks: { color: '#555', font: { size: 9 } }, grid: { display: false } },
+                        y: { stacked: true, grid: { color: '#222' }, ticks: { color: '#555', font: { size: 9 } } }
+                    }
+                }
+            });
+
+            createChart('reachChart', {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Impressions',
+                        data: [15000, 32000, 58000, 95000, 142000, 185000],
+                        borderColor: '#D4AF37',
+                        borderWidth: 3,
+                        fill: true,
+                        backgroundColor: 'rgba(212, 175, 55, 0.05)',
+                        tension: 0.4
+                    }]
+                },
+                options: getBaseOptions()
+            });
+
+            // Radar Chart - Radial Config
+            createChart('radarChart', {
+                type: 'radar',
+                data: {
+                    labels: [wrapLabel('Decision Access'), wrapLabel('Value Intent'), wrapLabel('B2B Trust'), wrapLabel('Creative Net'), wrapLabel('Lead Velocity')],
+                    datasets: [{
+                        label: 'LinkedIn',
+                        data: [95, 90, 85, 80, 75],
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderColor: '#2563eb'
+                    }, {
+                        label: 'Instagram',
+                        data: [30, 25, 20, 95, 40],
+                        backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                        borderColor: '#D4AF37'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    const label = item.chart.data.labels[item.dataIndex];
+                                    return Array.isArray(label) ? label.join(' ') : label;
+                                }
+                            }
+                        },
+                        legend: { labels: { color: '#888', font: { size: 9 } } }
+                    },
+                    scales: {
+                        r: {
+                            type: 'radialLinear',
+                            grid: { color: '#222' },
+                            angleLines: { color: '#222' },
+                            pointLabels: { color: '#888', font: { size: 9 } },
+                            ticks: { display: false, beginAtZero: true },
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            createChart('barChart', {
+                type: 'bar',
+                data: {
+                    labels: [wrapLabel('NYC Producers'), wrapLabel('Vegas Trade Mgrs'), wrapLabel('Ops Directors'), wrapLabel('Creative Leads')],
+                    datasets: [{
+                        label: 'Audience Volume',
+                        data: [88, 92, 75, 65],
+                        backgroundColor: ['#2563eb', '#D4AF37', '#2563eb', '#D4AF37'],
+                        borderRadius: 4
+                    }]
+                },
+                options: getBaseOptions()
+            });
+        }
+
+        function updateROI() {
+            const reach = parseInt(document.getElementById('reachInput').value);
+            const engage = parseFloat(document.getElementById('engageInput').value) / 100;
+            const conv = parseFloat(document.getElementById('convInput').value) / 100;
+
+            document.getElementById('reachVal').innerText = reach.toLocaleString();
+            document.getElementById('engageVal').innerText = (engage * 100).toFixed(1) + '%';
+            document.getElementById('convVal').innerText = (conv * 100).toFixed(1) + '%';
+
+            const briefCount = Math.floor(reach * engage * conv);
+            const pipeValue = (briefCount * 150000) / 1000000;
+            
+            document.getElementById('briefCount').innerText = briefCount;
+            document.getElementById('pipeVal').innerText = '$' + pipeValue.toFixed(1) + 'M';
+
+            let score = Math.floor((reach / 250000 * 20) + (engage * 100 * 10) + (conv * 100 * 15));
+            score = Math.min(score + 35, 100);
+            const scoreEl = document.getElementById('scoreVal');
+            scoreEl.innerText = score + '/100';
+            scoreEl.className = score > 80 ? 'text-3xl md:text-4xl font-bold heading-font italic text-asoae-gold' : 'text-3xl md:text-4xl font-bold heading-font italic text-white';
+        }
+
+        function renderPosts(filter = 'all') {
+            const grid = document.getElementById('postsGrid');
+            grid.innerHTML = '';
+            const filtered = filter === 'all' ? posts : posts.filter(p => p.type === filter);
+            
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'card-elevation p-6 flex flex-col justify-between space-y-4';
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[8px] font-black uppercase tracking-widest text-stone-500">#0${p.id}</span>
+                            <span class="text-[8px] font-black uppercase bg-white/5 px-2 py-0.5 rounded border border-white/10 ${p.market === 'NYC' ? 'text-asoae-blue' : 'text-asoae-gold'}">${p.market} Hub</span>
+                        </div>
+                        <h4 class="text-xl font-bold heading-font leading-none">${p.title}</h4>
+                        <p class="text-[11px] text-gray-400 italic leading-relaxed">"${p.copy}"</p>
+                    </div>
+                    <div class="pt-4 border-t border-white/5">
+                        <p class="text-[9px] font-black uppercase tracking-widest text-gray-600 mb-1">Direction</p>
+                        <p class="text-[10px] text-gray-300 font-medium">${p.creative}</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterPosts(type) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('filter-active', 'bg-gold', 'text-black'));
+            event.target.classList.add('filter-active');
+            renderPosts(type);
+        }
+
+        window.onload = () => {
+            initCharts();
+            renderPosts();
+            updateROI();
+        };
+    </script>
+</body>
+</html>
